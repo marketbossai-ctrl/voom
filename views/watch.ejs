@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %></title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b0b0e;color:#e8e8ed;min-height:100vh}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid #1e1e24}
+.logo{font-size:1.4rem;font-weight:800;text-decoration:none;color:#e8e8ed}
+.logo span{color:#625df5}
+.nav{display:flex;gap:1rem}
+.nav a{color:#888;text-decoration:none;font-size:0.85rem}
+.nav a:hover{color:#625df5}
+.main{max-width:1000px;margin:0 auto;padding:1.5rem}
+.video-section{display:grid;grid-template-columns:1fr 320px;gap:1.5rem;align-items:start}
+@media(max-width:800px){.video-section{grid-template-columns:1fr}}
+.video-wrapper{background:#000;border-radius:12px;overflow:hidden}
+video{width:100%;display:block;max-height:70vh}
+.video-info{padding:1rem 0}
+.video-info h1{font-size:1.3rem;margin-bottom:0.25rem}
+.video-stats{display:flex;gap:1rem;font-size:0.8rem;color:#888;margin-bottom:1rem}
+.video-stats span strong{color:#e8e8ed}
+.share-box{background:#121216;border:1px solid #1e1e24;border-radius:12px;padding:1.25rem}
+.share-box h3{font-size:0.9rem;margin-bottom:0.5rem;color:#888}
+.share-link{display:flex;gap:0.5rem;margin-bottom:0.75rem}
+.share-link input{flex:1;padding:8px 12px;border-radius:8px;border:1px solid #2a2a30;background:#1a1a20;color:#e8e8ed;font-size:0.85rem}
+.share-link button{padding:8px 16px;border-radius:8px;border:none;background:#625df5;color:#fff;cursor:pointer;font-size:0.85rem}
+.share-link button:hover{background:#5348e8}
+.sidebar{display:flex;flex-direction:column;gap:1rem}
+.sidebar-card{background:#121216;border:1px solid #1e1e24;border-radius:12px;padding:1.25rem}
+.sidebar-card h3{font-size:0.85rem;color:#888;margin-bottom:0.5rem}
+.reaction-btns{display:flex;gap:0.5rem}
+.reaction-btns button{font-size:1.3rem;background:none;border:none;cursor:pointer;padding:4px;border-radius:6px;transition:background .2s}
+.reaction-btns button:hover{background:#1e1e26}
+.comment-box textarea{width:100%;padding:8px 12px;border-radius:8px;border:1px solid #2a2a30;background:#1a1a20;color:#e8e8ed;font-size:0.85rem;resize:none;margin-bottom:0.5rem;font-family:inherit}
+.comment-box textarea:focus{border-color:#625df5;outline:none}
+.comment-box button{padding:6px 16px;border-radius:6px;border:none;background:#625df5;color:#fff;cursor:pointer;font-size:0.8rem}
+.comment{margin-top:0.75rem;padding:0.5rem 0;border-top:1px solid #1e1e24}
+.comment-author{font-weight:600;font-size:0.8rem}
+.comment-body{font-size:0.85rem;color:#ccc;margin-top:0.15rem}
+.cta-section{margin-top:1rem}
+.cta-section button{width:100%;padding:10px;border-radius:8px;border:none;font-weight:600;cursor:pointer;margin-bottom:0.5rem}
+.cta-book{background:#2d6b2d;color:#fff}
+.cta-visit{background:#2d4b6b;color:#fff}
+.cta-section button:hover{opacity:0.9}
+.empty-state{text-align:center;padding:2rem;color:#888}
+</style>
+</head>
+<body>
+<div class="hdr">
+<a href="/" class="logo">V<span>oom</span></a>
+<div class="nav">
+<a href="/">Upload</a>
+<a href="/dashboard">Dashboard</a>
+</div>
+</div>
+
+<div class="main">
+<div class="video-section">
+<div>
+<div class="video-wrapper">
+<video controls autoplay>
+<source src="/video/<%= video.filename %>" type="video/mp4">
+</video>
+</div>
+<div class="video-info">
+<h1><%= video.title %></h1>
+<div class="video-stats">
+<span><strong><%= video.total_views %></strong> view<%= video.total_views !== 1 ? 's' : '' %></span>
+<span><%= new Date(video.created_at).toLocaleDateString('en-US', {month:'short', day:'numeric', year:'numeric'}) %></span>
+</div>
+</div>
+</div>
+
+<div class="sidebar">
+<div class="sidebar-card">
+<h3>Share this video</h3>
+<div class="share-link">
+<input type="text" id="shareLink" value="<%= baseUrl %>/watch/<%= video.id %>" readonly>
+<button onclick="copyLink()">Copy</button>
+</div>
+<p style="font-size:0.75rem;color:#555">Anyone with this link can watch. No login required.</p>
+</div>
+
+<div class="sidebar-card">
+<h3>Reactions</h3>
+<div class="reaction-btns">
+<button onclick="react('👍')">👍</button>
+<button onclick="react('❤️')">❤️</button>
+<button onclick="react('😂')">😂</button>
+<button onclick="react('😮')">😮</button>
+<button onclick="react('🎉')">🎉</button>
+</div>
+<div id="reactionCounts" style="margin-top:0.5rem;font-size:0.8rem;color:#888">
+<% if (reactions && reactions.length) { reactions.forEach(r => { %><span style="margin-right:0.75rem"><%= r.emoji %> <%= r.count %></span><% }); } %>
+</div>
+</div>
+
+<div class="sidebar-card comment-box">
+<h3>Comments</h3>
+<textarea id="commentInput" rows="2" placeholder="Add a comment..."></textarea>
+<button onclick="addComment()">Post</button>
+<div id="comments">
+<% if (comments && comments.length) { comments.forEach(c => { %>
+<div class="comment">
+<div class="comment-author"><%= c.author || 'Anonymous' %></div>
+<div class="comment-body"><%= c.body %></div>
+</div>
+<% }); } %>
+</div>
+</div>
+
+<div class="sidebar-card cta-section">
+<h3>Call to Action</h3>
+<button class="cta-book" onclick="ctaClick('book')">📅 Book a Call</button>
+<button class="cta-visit" onclick="ctaClick('visit')">🌐 Visit Website</button>
+</div>
+</div>
+</div>
+</div>
+
+<script>
+function copyLink() {
+  const input = document.getElementById('shareLink');
+  input.select();
+  navigator.clipboard.writeText(input.value);
+  input.style.borderColor = '#4ade80';
+  setTimeout(() => input.style.borderColor = '', 1500);
+}
+
+function react(emoji) {
+  fetch('/api/reaction', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ video_id: '<%= video.id %>', emoji })
+  });
+  const el = document.getElementById('reactionCounts');
+  const existing = el.querySelector(`span:has-text("${emoji}")`);
+  if (existing) {
+    const parts = existing.textContent.trim().split(' ');
+    existing.innerHTML = `${emoji} ${parseInt(parts[1]||0)+1}`;
+  } else {
+    el.innerHTML += `<span style="margin-right:0.75rem">${emoji} 1</span>`;
+  }
+}
+
+function addComment() {
+  const input = document.getElementById('commentInput');
+  if (!input.value.trim()) return;
+  fetch('/api/comment', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ video_id: '<%= video.id %>', body: input.value, author: 'Viewer' })
+  });
+  const el = document.getElementById('comments');
+  el.innerHTML += `<div class="comment"><div class="comment-author">Viewer</div><div class="comment-body">${input.value}</div></div>`;
+  input.value = '';
+}
+
+function ctaClick(type) {
+  fetch('/api/cta-click', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ video_id: '<%= video.id %>', cta_type: type })
+  });
+  if (type === 'book') alert('📅 Booking link clicked!');
+  if (type === 'visit') alert('🌐 Website link clicked!');
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,20 @@
+services:
+  - type: web
+    name: voom
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_VERSION
+        value: 26.12.1
+      - key: PORT
+        value: "3000"
+      - key: BASE_URL
+        value: https://voom.onrender.com
+      - key: PE_API_KEY
+        value: pe_NFykUu87YxietB95z9xLcH0yVvt0zZLhiS6z0kbKApY
+    disk:
+      name: voom-data
+      mountPath: /opt/data/voom/data
+      sizeGB: 1
+    healthCheckPath: /

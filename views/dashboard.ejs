@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><%= title %></title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,system-ui,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0b0b0e;color:#e8e8ed;min-height:100vh}
+.hdr{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid #1e1e24}
+.logo{font-size:1.4rem;font-weight:800;text-decoration:none;color:#e8e8ed}
+.logo span{color:#625df5}
+.nav{display:flex;gap:1rem}
+.nav a{color:#888;text-decoration:none;font-size:0.85rem}
+.nav a:hover{color:#625df5}
+.main{max-width:1100px;margin:0 auto;padding:1.5rem}
+h1{font-size:1.5rem;margin-bottom:1.5rem}
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1rem;margin-bottom:2rem}
+.stat-card{background:#121216;border:1px solid #1e1e24;border-radius:10px;padding:1rem;text-align:center}
+.stat-card .num{font-size:1.8rem;font-weight:700;color:#625df5}
+.stat-card .label{font-size:0.8rem;color:#888;margin-top:0.25rem}
+.section-title{font-size:1rem;color:#888;margin-bottom:0.75rem;margin-top:1.5rem}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1rem}
+.card{background:#121216;border:1px solid #1e1e24;border-radius:10px;overflow:hidden;text-decoration:none;color:#e8e8ed;transition:border-color .2s}
+.card:hover{border-color:#625df5}
+.card-body{padding:0.75rem}
+.card-title{font-size:0.85rem;font-weight:600;margin-bottom:0.25rem}
+.card-meta{font-size:0.75rem;color:#666}
+.views-table{width:100%;border-collapse:collapse;font-size:0.8rem;margin-top:1rem}
+.views-table th{text-align:left;padding:0.5rem;color:#888;font-weight:500;border-bottom:1px solid #2a2a30}
+.views-table td{padding:0.5rem;border-bottom:1px solid #1a1a1e;color:#ccc}
+.views-table tr:hover td{background:#121216}
+.empty{text-align:center;padding:2rem;color:#888}
+.delete-btn{float:right;padding:4px 10px;border-radius:6px;border:1px solid #5a2a2a;background:#1a1a1e;color:#e44;cursor:pointer;font-size:0.75rem;margin-left:0.5rem}
+.delete-btn:hover{background:#2a1a1a}
+</style>
+</head>
+<body>
+<div class="hdr">
+<a href="/" class="logo">V<span>oom</span></a>
+<div class="nav">
+<a href="/">Upload</a>
+</div>
+</div>
+
+<div class="main">
+<h1>Dashboard</h1>
+
+<% if (videos.length === 0) { %>
+<div class="empty"><p style="font-size:2rem;margin-bottom:0.5rem">🎥</p><p>No videos yet. <a href="/" style="color:#625df5">Upload your first one</a>.</p></div>
+<% } else { 
+  const totalViews = videos.reduce((s, v) => s + v.total_views, 0);
+  const totalVids = videos.length;
+%>
+<div class="stats-row">
+<div class="stat-card"><div class="num"><%= totalVids %></div><div class="label">Videos</div></div>
+<div class="stat-card"><div class="num"><%= totalViews %></div><div class="label">Total Views</div></div>
+<div class="stat-card"><div class="num"><%= (totalViews / totalVids).toFixed(1) %></div><div class="label">Avg Views/Video</div></div>
+</div>
+
+<h2 class="section-title">Your Videos</h2>
+<div class="grid">
+<% videos.forEach(v => { %>
+<div class="card" style="position:relative">
+<a href="/watch/<%= v.id %>" style="text-decoration:none;color:inherit;display:block">
+<div style="background:#1a1a22;height:100px;display:flex;align-items:center;justify-content:center;font-size:2.5rem">🎬</div>
+<div class="card-body">
+<div class="card-title"><%= v.title %></div>
+<div class="card-meta"><%= v.total_views %> view<%= v.total_views !== 1 ? 's' : '' %> · <%= new Date(v.created_at).toLocaleDateString() %></div>
+</div>
+</a>
+</div>
+<% }) %>
+</div>
+
+<h2 class="section-title">Recent Views</h2>
+<% if (views.length === 0) { %>
+<div class="empty"><p>No views yet. Share a video link to get started.</p></div>
+<% } else { %>
+<table class="views-table">
+<thead><tr><th>Video</th><th>When</th><th>Browser</th><th>Device</th><th>Referrer</th></tr></thead>
+<tbody>
+<% views.forEach(v => { %>
+<tr>
+<td><%= v.video_title %></td>
+<td><%= new Date(v.viewed_at).toLocaleString() %></td>
+<td><%= v.browser || '-' %></td>
+<td><%= v.device || 'Desktop' %></td>
+<td><%= v.referrer ? new URL(v.referrer).hostname : 'Direct' %></td>
+</tr>
+<% }) %>
+</tbody>
+</table>
+<% } %>
+<% } %>
+</div>
+</body>
+</html>
